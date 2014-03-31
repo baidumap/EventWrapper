@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>EventWrapper</title>
+<script src="http://api.map.baidu.com/api?v=1.2"></script>
+<script src="../src/EventWrapper.min.js"></script>
+</head>
+<body>
+<h2>地图事件范例</h2>
+<div id="map" style="width:500px;height:320px"></div>
+<div id="result" style="width:300px;height:400px;position:absolute;top:10px;left:520px;overflow:auto">
+<h3>事件：</h3>
+<p id="event-list"></p>
+</div>
+<br />
+<input type="button" value="移除map特定的click事件监听" onclick="removeMapSpecificClickListener()" />
+<input type="button" value="移除map所有的click事件监听" onclick="removeMapAllClickListeners()" />
+<input type="button" value="移除所有map的事件监听" onclick="removeMapAllListeners()" /> <br />
+<input type="button" value="触发map的click事件" onclick="triggerEvent()" />
+<input type="button" value="触发marker的click事件，包含事件参数" onclick="triggerEventWithParam()" />
+<h2>DOM事件范例</h2>
+<div id="div2">click me</div>
+<input id="btn" type="button" value="click me" /><br /><br />
+<input type="button" value="移除div特定的click事件监听" onclick="removeDivSpecificClickListener()" />
+<input type="button" value="移除div所有的click事件监听" onclick="removeDivAllClickListeners()" />
+<input type="button" value="移除所有div的事件监听" onclick="removeDivAllListeners()" />
+
+<script>
+var map = new BMap.Map('map');
+map.centerAndZoom(new BMap.Point(116.404, 39.915), 11);
+var mkr = new BMap.Marker(map.getCenter());
+map.addOverlay(mkr);
+
+var listener1 = BMapLib.EventWrapper.addListener(map, 'click', function(e){
+    showEvent(e);
+});
+BMapLib.EventWrapper.addListener(map, 'click', function(e){
+    showEvent(e);
+});
+BMapLib.EventWrapper.addListener(map, 'dragstart', function(e){
+    showEvent(e);
+});
+BMapLib.EventWrapper.addListenerOnce(map, 'dragend', function(e){
+    showEvent(e);
+});
+var mkrLis = BMapLib.EventWrapper.addListener(mkr, 'click', function(e){
+    showEvent(e);
+});
+var divClickListener = BMapLib.EventWrapper.addDomListener(document.getElementById('div2'), 'click', function(e){
+    showEvent(e);
+});
+BMapLib.EventWrapper.addDomListenerOnce(document.getElementById('btn'), 'click', function(e){
+    showEvent(e);
+});
+
+BMapLib.EventWrapper.addDomListener(document.getElementById('div2'), 'click', function(e){
+    showEvent(e);
+});
+BMapLib.EventWrapper.addDomListener(document.getElementById('div2'), 'mouseup', function(e){
+    showEvent(e);
+});
+
+// 清除特定事件监听
+function removeMapSpecificClickListener() {
+    BMapLib.EventWrapper.removeListener(listener1);
+}
+
+// 清除map所有click事件监听
+function removeMapAllClickListeners() {
+    BMapLib.EventWrapper.clearListeners(map, 'click');
+}
+
+// 清除map所有的事件监听
+function removeMapAllListeners() {
+    BMapLib.EventWrapper.clearInstanceListeners(map);
+}
+
+// 清除特定事件监听
+function removeDivSpecificClickListener() {
+    BMapLib.EventWrapper.removeListener(divClickListener);
+}
+
+// 清除map所有click事件监听
+function removeDivAllClickListeners() {
+    BMapLib.EventWrapper.clearListeners(document.getElementById('div2'), 'click');
+}
+
+// 清除map所有的事件监听
+function removeDivAllListeners() {
+    BMapLib.EventWrapper.clearInstanceListeners(document.getElementById('div2'));
+}
+
+// 触发事件
+function triggerEvent() {
+    BMapLib.EventWrapper.trigger(map, 'click');
+}
+
+function triggerEventWithParam() {
+    BMapLib.EventWrapper.trigger(mkr, 'click', {'type': 'onclick', target: mkr});
+}
+
+var eventList = document.getElementById('event-list');
+function showEvent (event){
+    var newLine = '';
+    if (!event) { // 手动触发的事件可能没有事件参数，注意需要判断
+        newLine = '手动触发了一个事件';
+    } else { // 注意即使有event对象，但不保证type和target属性都包含，手动触发的事件参数内容是自定义的
+        newLine = event.type + ' event from ' + event.target;
+    }
+    eventList.innerHTML = newLine + '<br />' + eventList.innerHTML;
+}
+</script>
+</body>
+</html>
